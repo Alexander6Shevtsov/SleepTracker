@@ -26,7 +26,7 @@ final class HomeViewModel: ObservableObject {
     @Published var startProgress: CGFloat = 0 // прогресс
     @Published var toProgress: CGFloat = 0 //
     
-    @Published var selectedDays: Set<String> = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    @Published var selectedDays: Set<String> = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
     
     @Published var isRemainderEnabled: Bool = false { // напоминание
         didSet {
@@ -34,10 +34,16 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
+    let daysOfWeek: [(id: String, initial: String)] = [("Mo", "M"), ("Tu", "T"), ("We", "W"), ("Th", "T1"), ("Fr", "F"), ("Sa", "S"), ("Su", "S1")]
+    
     @Published var sleepData: [SleepData] = [] // данные по дням
     @Published var filtredData: [SleepData] = []
     
     @Published var timeView: TimeView = .week
+    
+    init () {
+        generateSample()
+    }
     
     func getDateComponents(for day: String) -> DateComponents {
         var components = DateComponents()
@@ -103,6 +109,14 @@ final class HomeViewModel: ObservableObject {
         } else {
             toAngle = angle
             toProgress = progress
+        }
+    }
+    
+    func onTapDay(id: String) {
+        if selectedDays.contains(id) {
+            selectedDays.remove(id)
+        } else {
+            selectedDays.insert(id)
         }
     }
     

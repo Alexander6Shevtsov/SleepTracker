@@ -76,24 +76,26 @@ struct HomeView: View {
             
         }
     }
-    
+                                                                // упростить rotationEffect!
     @ViewBuilder func sleepTimeSlider() -> some View {
         GeometryReader { proxy in
             let width = proxy.size.width
             ZStack {
-                let numbers = [12, 15, 18, 21, 0, 3, 6, 9]
-                
-                ForEach(numbers.indices, id: \.self) {
-                    index in Text("\(numbers[index])")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
-                        .rotationEffect(.init(degrees: Double(index) * -45))
-                        .offset(y: (width - 90) / 2)
-                        .rotationEffect(.init(degrees: Double(index) * 45))
+                ZStack {
+                    let numbers = [12, 15, 18, 21, 0, 3, 6, 9]
+                    
+                    ForEach(numbers.indices, id: \.self) {
+                        index in Text("\(numbers[index])")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                            .rotationEffect(.init(degrees: Double(index) * -45))
+                            .offset(y: (width - 90) / 2)
+                            .rotationEffect(.init(degrees: Double(index) * 45))
+                    }
                 }
                 Circle()
                     .stroke(Color.black.opacity(0.06), lineWidth: 40)
-                let reverseRotation = homeViewModel.startProgress > homeViewModel.toProgress ? Double((1 - homeViewModel.startAngle) * 360) : 0
+                let reverseRotation = homeViewModel.startProgress > homeViewModel.toProgress ? Double((1 - homeViewModel.startProgress) * 360) : 0
                 Circle()
                     .trim(from: homeViewModel.startProgress > homeViewModel.toProgress ? 0 : homeViewModel.startProgress, to: homeViewModel.toProgress)
                     .stroke(Color.black, style: StrokeStyle(lineWidth: 40, lineCap: .round, lineJoin: .round))
@@ -135,8 +137,8 @@ struct HomeView: View {
                         .font(.title)
                         .fontWeight(.medium)
                     Text("\(difference.1)")
-                    font(.title)
-                    fontWeight(.medium)
+                    font(.title)             // ! неправильно использован.
+                    fontWeight(.medium)      // ! неправильно использован.
                 }
             }
         }

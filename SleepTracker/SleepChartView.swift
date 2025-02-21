@@ -1,5 +1,5 @@
 //
-//  SleepChatView.swift
+//  SleepChartView.swift
 //  SleepTracker
 //
 //  Created by Alexander Shevtsov on 20.02.2025.
@@ -8,8 +8,8 @@
 import SwiftUI
 import Charts
 
-struct SleepChatView: View {
-    @ObservableObject var homeViewModel = HomeViewModel()
+struct SleepChartView: View {
+    @ObservedObject var homeViewModel = HomeViewModel()
     
     var body: some View {
         NavigationView {
@@ -28,13 +28,30 @@ struct SleepChatView: View {
                 Chart {
                     RuleMark(y: .value("Target", 7.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation()
+                        .annotation(alignment: .leading) {
+                            Text("Target")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    ForEach(homeViewModel.filteredSleepData) { data in
+                        BarMark(
+                            x: .value("Date", data.date, unit: .day),
+                            y: .value("Sleep time", data.sleepDuration)
+                        )
+                        .foregroundStyle(.blue.gradient)
+                    }
                 }
+                .frame(height: 300)
+                .chartYScale(domain: 0...10)
+                .padding()
+                
+                Spacer()
             }
+            .navigationTitle(Text("Duration of sleep"))
         }
     }
 }
 
 #Preview {
-    SleepChatView()
+    SleepChartView()
 }

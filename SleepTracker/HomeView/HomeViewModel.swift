@@ -22,9 +22,9 @@ struct SleepData: Identifiable { // вспомогательная инф
 
 final class HomeViewModel: ObservableObject {
     @Published var startAngle: Double = 0 // стартовый угол
-    @Published var toAngle: Double = 0 // куда двигаем
+    @Published var toAngle: Double = 180 // куда двигаем
     @Published var startProgress: CGFloat = 0 // прогресс
-    @Published var toProgress: CGFloat = 0 //
+    @Published var toProgress: CGFloat = 0.5 //
     
     @Published var selectedDays: Set<String> = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
     
@@ -34,15 +34,16 @@ final class HomeViewModel: ObservableObject {
         }
     }
     
-    let daysOfWeek: [(id: String, initial: String)] = [("Mo", "M"), ("Tu", "T"), ("We", "W"), ("Th", "T1"), ("Fr", "F"), ("Sa", "S"), ("Su", "S1")]
+    let daysOfWeek: [(id: String, initial: String)] = [("Mo", "M"), ("Tu", "T"), ("We", "W"), ("Th", "T"), ("Fr", "F"), ("Sa", "S"), ("Su", "S")]
     
     @Published var sleepData: [SleepData] = [] // данные по дням
-    @Published var filtredData: [SleepData] = []
+    @Published var filteredSleepData: [SleepData] = []
     
     @Published var timeView: TimeView = .week
     
     init () {
         generateSample()
+        filterSleepData()
     }
     
     func getDateComponents(for day: String) -> DateComponents {
@@ -56,14 +57,14 @@ final class HomeViewModel: ObservableObject {
         components.minute = dateComponents.minute
         components.second = 0
         switch day {
-        case "Пн": components.weekday = 1
-        case "Вт": components.weekday = 2
-        case "Ср": components.weekday = 3
-        case "Чт": components.weekday = 4
-        case "Пт": components.weekday = 5
-        case "Сб": components.weekday = 6
-        case "Вс": components.weekday = 7 // попробуй сделать default
-            default : break
+        case "Mo": components.weekday = 1
+        case "Tu": components.weekday = 2
+        case "We": components.weekday = 3
+        case "Th": components.weekday = 4
+        case "Fr": components.weekday = 5
+        case "Sa": components.weekday = 6
+        case "Su": components.weekday = 7 // попробуй сделать default
+        default : break
         }
         
         return components
@@ -74,7 +75,7 @@ final class HomeViewModel: ObservableObject {
         let hour = Int(progress)
         let remainder = (progress.truncatingRemainder(dividingBy: 1) * 12).rounded()
         var minute = remainder * 5
-        minute = (minute > 55 ? 55 : minute)
+        minute = (minute > 55 ? 55 : minute) // проверить вычисления
         var components = DateComponents()
         components.hour = hour == 24 ? 0 : hour
         components.minute = Int(minute)
@@ -125,14 +126,34 @@ final class HomeViewModel: ObservableObject {
             SleepData(date: Date().addingTimeInterval(-84600 * 6), sleepDuration: 7.0),
             SleepData(date: Date().addingTimeInterval(-84600 * 5), sleepDuration: 6.0),
             SleepData(date: Date().addingTimeInterval(-84600 * 4), sleepDuration: 8.3),
-            SleepData(date: Date().addingTimeInterval(-84600 * 3), sleepDuration: 9.5),
+            SleepData(date: Date().addingTimeInterval(-84600 * 3), sleepDuration: 7.0),
             SleepData(date: Date().addingTimeInterval(-84600 * 2), sleepDuration: 7.5),
             SleepData(date: Date().addingTimeInterval(-84600 * 1), sleepDuration: 7.2),
             SleepData(date: Date(), sleepDuration: 8.0)
         ]
     }
     
-    private func filterSleepData() {
+    func filterSleepData() {
+        let calendar = Calendar.current
+        let now = Date()
         
+        switch timeView {
+        case .day:
+            filteredSleepData = sleepData.filter({
+                calendar.isDate($0.date, inSameDayAs: now)
+            })
+        case .week:
+            if let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) {
+                filteredSleepData = sleepData.filter({
+                    $0.date > weekAgo && $0.date < now
+                })
+            }
+        case .month:
+            if let monthAgo = calendar.date(byAdding: .month, value: -1, to: now) {
+                filteredSleepData = sleepData.filter({
+                    $0.date > monthAgo && $0.date < now
+                })
+            }
+        }
     }
 }

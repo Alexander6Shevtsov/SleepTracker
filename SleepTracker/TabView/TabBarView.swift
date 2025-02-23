@@ -1,5 +1,5 @@
 //
-//  TabView.swift
+//  TabBarView.swift
 //  SleepTracker
 //
 //  Created by Alexander Shevtsov on 20.02.2025.
@@ -35,9 +35,9 @@ struct TabBarView: View {
                     Image(systemName: "gearshape")
                     Text("Settings")
                 }
-                .onAppear() {
-                    selectedTab = 2
-                }
+//                .onAppear() {
+//                    selectedTab = 2
+//                }
                 .tag(2)
         }
     }

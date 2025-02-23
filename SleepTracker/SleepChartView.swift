@@ -12,19 +12,19 @@ struct SleepChartView: View {
     @ObservedObject var homeViewModel = HomeViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Picker("Time", selection: $homeViewModel.timeView) {
-                    ForEach(TimeView.allCases, id: \.self) {
-                        view in
+                    ForEach(TimeView.allCases, id: \.self) { view in
                         Text(view.rawValue.capitalized).tag(view)
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
-                onChange(of: homeViewModel.timeView) {
+                onChange(of: homeViewModel.timeView) { _, _ in
                     homeViewModel.filterSleepData()
                 }
+                
                 Chart {
                     RuleMark(y: .value("Target", 7.5))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
@@ -48,6 +48,15 @@ struct SleepChartView: View {
                 Spacer()
             }
             .navigationTitle(Text("Duration of sleep"))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        homeViewModel.filterSleepData()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                }
+            }
         }
     }
 }

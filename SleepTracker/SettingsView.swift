@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 final class SettingsViewModel: ObservableObject {
-    @Published var username: String = ""
-    @Published var email: String = ""
+    @AppStorage("username") var username: String = ""
+    @AppStorage("email") var email: String = ""
     @Published var isNotificationsEnabled = false {
         didSet {
             if isNotificationsEnabled {
@@ -19,11 +20,17 @@ final class SettingsViewModel: ObservableObject {
     }
     
     private func enableNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
-            if success {
-                print("All set!")
-            } else if let error {
-                print(error.localizedDescription)
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .badge, .sound]
+        ) { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    print("Notification enable")
+                } else if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                } else {
+                    print("User denied notifications")
+                }
             }
         }
     }
@@ -44,25 +51,19 @@ struct SettingsView: View {
                 }
                 
                 Section(header: Text("Dream")) {
-                    NavigationLink("Duration of sleep") {
-                        SleepChartView()
-                    }
-                    Text("Achievements")
-                    HStack {
                         Picker("My target", selection: $hours) {
                             ForEach(1..<12, id: \.self) { hour in
                                 Text("\(hour)h").tag(hour)
                             }
                         }
-                        .pickerStyle(.navigationLink)
+                        .pickerStyle(.wheel)
                         
-                        Picker("", selection: $minutes) {
+                        Picker("Minutes", selection: $minutes) {
                             ForEach(0..<60, id: \.self) { minute in
                                 Text("\(minute)m").tag(minute)
                             }
                         }
-                        .pickerStyle(.navigationLink)
-                    }
+                        .pickerStyle(.wheel)
                 }
                 
                 Section(header: Text("General")) {

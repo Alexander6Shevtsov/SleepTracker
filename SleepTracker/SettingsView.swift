@@ -9,8 +9,8 @@ import SwiftUI
 import UserNotifications
 
 final class SettingsViewModel: ObservableObject {
-    @AppStorage("username") var username: String = ""
-    @AppStorage("email") var email: String = ""
+    //    @AppStorage("username") var username: String = ""
+    //    @AppStorage("email") var email: String = ""
     @Published var isNotificationsEnabled = false {
         didSet {
             if isNotificationsEnabled {
@@ -20,16 +20,22 @@ final class SettingsViewModel: ObservableObject {
     }
     
     private func enableNotifications() {
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .badge, .sound]
-        ) { success, error in
+        let center = UNUserNotificationCenter.current()
+        
+        center.getNotificationSettings { settings in
             DispatchQueue.main.async {
-                if success {
-                    print("Notification enable")
-                } else if let error = error {
-                    print("Error: \(error.localizedDescription)")
+                if settings.authorizationStatus == .authorized {
+                    print("Notifications already enabled")
                 } else {
-                    print("User denied notifications")
+                    center.requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
+                        if success {
+                            print("Notifications enabled")
+                        } else if let error = error {
+                            print("Error: \(error.localizedDescription)")
+                        } else {
+                            print("User denied notifications")
+                        }
+                    }
                 }
             }
         }
@@ -37,33 +43,35 @@ final class SettingsViewModel: ObservableObject {
 }
 
 struct SettingsView: View {
+    @AppStorage("username") private var username: String = ""
+    @AppStorage("email") private var email: String = ""
     @StateObject private var settingsViewModel = SettingsViewModel()
-    @State var hours: Int = 0
-    @State var minutes: Int = 0
+    @State var hours: Int = 7 // Значение по умолчанию
+    @State var minutes: Int = 30 // Значение по умолчанию
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("Profile")) {
-                    TextField("Name user", text:$settingsViewModel.username)
-                    TextField("Email", text:$settingsViewModel.email)
+                    TextField("Name user", text:$username)
+                    TextField("Email", text:$email)
                     Toggle("Notifications", isOn: $settingsViewModel.isNotificationsEnabled)
                 }
                 
                 Section(header: Text("Dream")) {
-                        Picker("My target", selection: $hours) {
-                            ForEach(1..<12, id: \.self) { hour in
-                                Text("\(hour)h").tag(hour)
-                            }
+                    Picker("Hours", selection: $hours) {
+                        ForEach(1..<12, id: \.self) { hour in
+                            Text("\(hour)h").tag(hour)
                         }
-                        .pickerStyle(.wheel)
-                        
-                        Picker("Minutes", selection: $minutes) {
-                            ForEach(0..<60, id: \.self) { minute in
-                                Text("\(minute)m").tag(minute)
-                            }
+                    }
+                    .pickerStyle(.wheel)
+                    
+                    Picker("Minutes", selection: $minutes) {
+                        ForEach(0..<60, id: \.self) { minute in
+                            Text("\(minute)m").tag(minute)
                         }
-                        .pickerStyle(.wheel)
+                    }
+                    .pickerStyle(.wheel)
                 }
                 
                 Section(header: Text("General")) {

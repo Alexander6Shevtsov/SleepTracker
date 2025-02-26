@@ -8,37 +8,24 @@
 import SwiftUI
 
 struct TabBarView: View {
-    @State private var selectedTab = 0
+    @AppStorage("selectedTab") private var selectedTab = 0
     
+    private let tabs: [(view: AnyView, icon: String, title: String)] = [
+        (AnyView(HomeView()), "house", "Main"),
+        (AnyView(SleepChartView()), "chart.bar.xaxis", "Schedule"),
+        (AnyView(SettingsView()), "gearshape", "Settings")
+    ]
+
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house")
-                    Text("Main")
-                }
-                .onAppear() {
-                    selectedTab = 0
-                }
-                .tag(0)
-            SleepChartView()
-                .tabItem {
-                    Image(systemName: "chart.bar.xaxis")
-                    Text("Schedule")
-                }
-                .onAppear() {
-                    selectedTab = 1
-                }
-                .tag(1)
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape")
-                    Text("Settings")
-                }
-//                .onAppear() {
-//                    selectedTab = 2
-//                }
-                .tag(2)
+            ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                tab.view
+                    .tabItem {
+                        Image(systemName: tab.icon)
+                        Text(tab.title)
+                    }
+                    .tag(index)
+            }
         }
     }
 }

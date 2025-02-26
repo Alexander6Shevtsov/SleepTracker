@@ -48,47 +48,46 @@ final class HomeViewModel: ObservableObject {
         filterSleepData()
     }
     
-//    func getDateComponents(for day: String) -> DateComponents {
-//        var components = DateComponents()
-//        let startDate = getTime(angle: startAngle)
-//        let calendar = Calendar.current
-//        let notificationsDate = calendar.date(
-//            byAdding: .minute,
-//            value: -30,
-//            to: startDate
-//        ) ?? startDate
-//        
-//        let dateComponents = calendar.dateComponents([.hour, .minute], from: notificationsDate)
-//        components.hour = dateComponents.hour
-//        components.minute = dateComponents.minute
-//        components.second = 0
-//        switch day {
-//        case "Mo": components.weekday = 1
-//        case "Tu": components.weekday = 2
-//        case "We": components.weekday = 3
-//        case "Th": components.weekday = 4
-//        case "Fr": components.weekday = 5
-//        case "Sa": components.weekday = 6
-//        case "Su": components.weekday = 7    // попробуй сделать default
-//        default : break
-//        }
-//        
-//        return components
-//    }
+    //    func getDateComponents(for day: String) -> DateComponents {
+    //        var components = DateComponents()
+    //        let startDate = getTime(angle: startAngle)
+    //        let calendar = Calendar.current
+    //        let notificationsDate = calendar.date(
+    //            byAdding: .minute,
+    //            value: -30,
+    //            to: startDate
+    //        ) ?? startDate
+    //
+    //        let dateComponents = calendar.dateComponents([.hour, .minute], from: notificationsDate)
+    //        components.hour = dateComponents.hour
+    //        components.minute = dateComponents.minute
+    //        components.second = 0
+    //        switch day {
+    //        case "Mo": components.weekday = 1
+    //        case "Tu": components.weekday = 2
+    //        case "We": components.weekday = 3
+    //        case "Th": components.weekday = 4
+    //        case "Fr": components.weekday = 5
+    //        case "Sa": components.weekday = 6
+    //        case "Su": components.weekday = 7    // попробуй сделать default
+    //        default : break
+    //        }
+    //
+    //        return components
+    //    }
     
     func getTime(angle: Double) -> Date {
         let progress = angle / 30
         let hour = Int(progress) % 24
         let remainder = (progress.truncatingRemainder(dividingBy: 1) * 60).rounded()
         let minute = min(Int(remainder), 55)
-
+        
         var components = DateComponents()
         components.hour = hour
         components.minute = minute
         components.second = 0
-                         
-        let calendar = Calendar.current
-        return calendar.date(from: components) ?? Date()
+        
+        return Calendar.current.date(from: components) ?? Date()
     }
     
     func getTimeDifference() -> (Int, Int) {
@@ -97,7 +96,7 @@ final class HomeViewModel: ObservableObject {
         let endTime = getTime(angle: toAngle)
         
         var components = calendar.dateComponents([.hour, .minute], from: startTime, to: endTime)
-       
+        
         if components.hour ?? 0 < 0 {
             components.hour = (components.hour ?? 0) + 24
         }
@@ -113,6 +112,7 @@ final class HomeViewModel: ObservableObject {
         if angle < 0 {
             angle += 360
         }
+        
         let progress = angle / 360
         if fromSlider {
             startAngle = angle
@@ -132,15 +132,13 @@ final class HomeViewModel: ObservableObject {
     }
     
     private func generateSample() {
-        sleepData = [
-            SleepData(date: Date().addingTimeInterval(-84600 * 6), sleepDuration: 7.0),
-            SleepData(date: Date().addingTimeInterval(-84600 * 5), sleepDuration: 6.0),
-            SleepData(date: Date().addingTimeInterval(-84600 * 4), sleepDuration: 8.3),
-            SleepData(date: Date().addingTimeInterval(-84600 * 3), sleepDuration: 7.0),
-            SleepData(date: Date().addingTimeInterval(-84600 * 2), sleepDuration: 7.5),
-            SleepData(date: Date().addingTimeInterval(-84600 * 1), sleepDuration: 7.2),
-            SleepData(date: Date(), sleepDuration: 8.0)
-        ]
+        let now = Date()
+        sleepData = (0..<7).map { i in
+            SleepData(
+                date: Calendar.current.date(byAdding: .day, value: -i, to: now) ?? now,
+                sleepDuration: Double.random(in: 6...8.5)
+            )
+        }
     }
     
     func filterSleepData() {
@@ -149,20 +147,20 @@ final class HomeViewModel: ObservableObject {
         
         switch timeView {
         case .day:
-            filteredSleepData = sleepData.filter({
+            filteredSleepData = sleepData.filter {
                 calendar.isDate($0.date, inSameDayAs: now)
-            })
+            }
         case .week:
             if let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) {
-                filteredSleepData = sleepData.filter({
+                filteredSleepData = sleepData.filter {
                     $0.date > weekAgo && $0.date < now
-                })
+                }
             }
         case .month:
             if let monthAgo = calendar.date(byAdding: .month, value: -1, to: now) {
-                filteredSleepData = sleepData.filter({
+                filteredSleepData = sleepData.filter {
                     $0.date > monthAgo && $0.date < now
-                })
+                }
             }
         }
     }

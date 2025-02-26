@@ -48,34 +48,6 @@ final class HomeViewModel: ObservableObject {
         filterSleepData()
     }
     
-    //    func getDateComponents(for day: String) -> DateComponents {
-    //        var components = DateComponents()
-    //        let startDate = getTime(angle: startAngle)
-    //        let calendar = Calendar.current
-    //        let notificationsDate = calendar.date(
-    //            byAdding: .minute,
-    //            value: -30,
-    //            to: startDate
-    //        ) ?? startDate
-    //
-    //        let dateComponents = calendar.dateComponents([.hour, .minute], from: notificationsDate)
-    //        components.hour = dateComponents.hour
-    //        components.minute = dateComponents.minute
-    //        components.second = 0
-    //        switch day {
-    //        case "Mo": components.weekday = 1
-    //        case "Tu": components.weekday = 2
-    //        case "We": components.weekday = 3
-    //        case "Th": components.weekday = 4
-    //        case "Fr": components.weekday = 5
-    //        case "Sa": components.weekday = 6
-    //        case "Su": components.weekday = 7    // попробуй сделать default
-    //        default : break
-    //        }
-    //
-    //        return components
-    //    }
-    
     func getTime(angle: Double) -> Date {
         let progress = angle / 30
         let hour = Int(progress) % 24
